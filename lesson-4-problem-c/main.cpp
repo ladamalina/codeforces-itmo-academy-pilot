@@ -10,6 +10,8 @@ using namespace std::literals;
 template<typename T>
 class SegmentTreeMinCount {
  public:
+  using Node = std::pair<T, size_t>;
+
   explicit SegmentTreeMinCount(const std::vector<T>& a)
     : INF(std::numeric_limits<T>::max()) {
     while (size_ < a.size()) size_ *= 2;
@@ -17,7 +19,7 @@ class SegmentTreeMinCount {
     Init(a, 0, 0, size_);
   }
 
-  [[nodiscard]] std::pair<T, size_t> MinCount(size_t l, size_t r) {
+  [[nodiscard]] Node MinCount(size_t l, size_t r) {
     return MinCount(l, r, 0, 0, size_);
   }
 
@@ -26,11 +28,11 @@ class SegmentTreeMinCount {
   }
 
  private:
-  std::vector<std::pair<T, size_t>> tree;
+  std::vector<Node> tree;
   size_t size_ = 1;
   const T INF;
 
-  std::pair<T, size_t> Combine(const std::pair<T, size_t>& a, const std::pair<T, size_t>& b) {
+  Node Combine(const Node& a, const Node& b) {
     if (a.first < b.first) return a;
     if (a.first > b.first) return b;
     return {a.first, a.second + b.second};
@@ -47,7 +49,7 @@ class SegmentTreeMinCount {
     }
   }
 
-  [[nodiscard]] std::pair<T, size_t> MinCount(size_t l, size_t r, size_t x, size_t lx, size_t rx) {
+  [[nodiscard]] Node MinCount(size_t l, size_t r, size_t x, size_t lx, size_t rx) {
     if (rx <= l || lx >= r) return {INF, 0};
     if (rx <= r && lx >= l) return tree[x];
     const auto m = (lx + rx) / 2;
