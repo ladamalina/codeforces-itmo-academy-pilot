@@ -76,8 +76,8 @@ void Solution(std::istream& cin, std::ostream& cout) {
       tree.Set(i, v);
     } else {
       cin >> l >> r;
-      const auto s = tree.Sum(l, r);
-      cout << s << '\n';
+      const auto sum_a = tree.Sum(l, r);
+      cout << sum_a << '\n';
     }
   }
 }
