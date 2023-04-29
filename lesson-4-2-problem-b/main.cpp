@@ -16,7 +16,7 @@ class SegmentTree {
     Init(a, 0, 0, static_cast<int>(size_));
   }
 
-  [[nodiscard]] int GetNthIdx(int i) { // @todo Implement
+  [[nodiscard]] int GetNthIdx(int i) {
     return GetNthIdx(i + 1, 0, 0, static_cast<int>(size_));
   }
 
