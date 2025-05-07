@@ -2,41 +2,41 @@
 
 using namespace std::literals;
 
+using ll = long long;
 using ii [[maybe_unused]] = std::pair<int, int>;
 using vi [[maybe_unused]] = std::vector<int>;
+using vl [[maybe_unused]] = std::vector<ll>;
 using vvi [[maybe_unused]] = std::vector<vi>;
-using vvvi [[maybe_unused]] = std::vector<vvi>;
 using vii [[maybe_unused]] = std::vector<ii>;
 using vb [[maybe_unused]] = std::vector<bool>;
 using vd [[maybe_unused]] = std::vector<double>;
+using vs [[maybe_unused]] = std::vector<std::string>;
 
 #define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
 #define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
+#define CL(_v) static_cast<ll>(_v)
 #define CD(_v) static_cast<double>(_v)
 #define F first
 #define S second
 #define PB push_back
 
-[[maybe_unused]] const int MAX = std::numeric_limits<int>::max();
-[[maybe_unused]] const int MIN = std::numeric_limits<int>::min();
-
 template<typename T>
-class SegTreeAdd {
+class SegTree { // Прибавление к отрезку
  public:
-  explicit SegTreeAdd(const std::vector<T>& a) {
+  explicit SegTree(const std::vector<T>& a) {
     while (size_ < CI(a.size())) size_ *= 2;
     t_.resize(size_ * 2 - 1);
     Init(a, 0, 0, size_);
   }
 
-  void Add(int l, int r, T v) {
-    Add(l, r, v, 0, 0, size_);
+  void Modify(int l, int r, T v) {
+    Modify(l, r, v, 0, 0, size_);
   }
 
-  [[nodiscard]] T Get(int i) {
+  T Get(int i) {
     return Get(i, 0, 0, size_);
   }
 
@@ -55,49 +55,39 @@ class SegTreeAdd {
     }
   }
 
-  void Add(int l, int r, T v, T x, int lx, int rx) {
-    if (rx <= l || lx >= r) {
-      return;
-    }
+  void Modify(int l, int r, T v, int x, int lx, int rx) {
+    if (rx <= l || lx >= r) return;
     if (rx <= r && lx >= l) {
       t_[x] += v;
       return;
     }
     const auto m = (lx + rx) / 2;
-    Add(l, r, v, 2*x+1, lx, m);
-    Add(l, r, v, 2*x+2, m, rx);
+    Modify(l, r, v, 2*x+1, lx, m);
+    Modify(l, r, v, 2*x+2, m, rx);
   }
 
-  [[nodiscard]] T Get(int i, int x, int lx, int rx) {
-    if (lx + 1 == rx) {
+  T Get(int i, int x, int lx, int rx) {
+    if (lx + 1 == rx)
       return t_[x];
-    }
     const auto m = (lx + rx) / 2;
-    if (i < m) {
+    if (i < m)
       return Get(i, 2*x+1, lx, m) + t_[x];
-    } else {
-      return Get(i, 2*x+2, m, rx) + t_[x];
-    }
+    return Get(i, 2*x+2, m, rx) + t_[x];
   }
 };
 
 void Solution(std::istream& cin, std::ostream& cout) {
-  int n, m;
-  cin >> n >> m;
-  std::vector<int64_t> a(n);
-  SegTreeAdd<int64_t> tree(a);
-  int op;
+  int n, m; cin >> n >> m;
+  vl a(n);
+  SegTree tree(a);
   FOR(j, 0, m-1) {
-    cin >> op;
+    int op; cin >> op;
     if (op == 1) {
-      int l, r, v;
-      cin >> l >> r >> v;
-      tree.Add(l, r, v);
+      int l, r, v; cin >> l >> r >> v;
+      tree.Modify(l, r, v);
     } else {
-      int i;
-      cin >> i;
-      const auto v = tree.Get(i);
-      cout << v << '\n';
+      int i; cin >> i;
+      cout << tree.Get(i) << '\n';
     }
   }
 }
