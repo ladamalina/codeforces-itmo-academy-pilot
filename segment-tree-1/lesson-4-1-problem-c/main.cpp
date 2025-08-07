@@ -1,46 +1,52 @@
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 template<typename T>
 class SegTree { // Число минимумов на отрезке
  public:
   using Node = std::pair<T, int>;
 
-  explicit SegTree(const std::vector<T>& a)
-      : INF(std::numeric_limits<T>::max()) {
-    while (size_ < CI(a.size())) size_ *= 2;
-    t_.resize(size_ * 2 - 1, {INF, 0});
-    Init(a, 0, 0, size_);
+  explicit SegTree(const std::vector<T>& a) : INF(std::numeric_limits<T>::max()) {
+    while (size_ < SZ(a)) size_ <<= 1;
+    t_.resize(size_ << 1, {INF, 0});
+    Init(a, 1, 0, size_);
   }
 
   Node MinCount(int l, int r) {
-    return MinCount(l, r, 0, 0, size_);
+    return MinCount(l, r, 1, 0, size_);
   }
 
   void Set(int i, T v) {
-    Set(i, v, 0, 0, size_);
+    Set(i, v, 1, 0, size_);
   }
 
  private:
@@ -56,20 +62,20 @@ class SegTree { // Число минимумов на отрезке
 
   void Init(const std::vector<T>& a, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      if (lx < CI(a.size())) t_[x] = {a[lx], 1};
+      if (lx < SZ(a)) t_[x] = {a[lx], 1};
     } else {
-      const auto m = (lx + rx) / 2;
-      Init(a, 2*x+1, lx, m);
-      Init(a, 2*x+2, m, rx);
-      t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+      const auto m = (lx + rx) >> 1;
+      Init(a, (x<<1), lx, m);
+      Init(a, (x<<1)|1, m, rx);
+      t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
     }
   }
 
   [[nodiscard]] Node MinCount(int l, int r, int x, int lx, int rx) {
     if (rx <= l || lx >= r) return {INF, 0};
     if (rx <= r && lx >= l) return t_[x];
-    const auto m = (lx + rx) / 2;
-    return Combine(MinCount(l, r, 2*x+1, lx, m), MinCount(l, r, 2*x+2, m, rx));
+    const auto m = (lx + rx) >> 1;
+    return Combine(MinCount(l, r, (x<<1), lx, m), MinCount(l, r, (x<<1)|1, m, rx));
   }
 
   void Set(int i, T v, int x, int lx, int rx) {
@@ -77,10 +83,10 @@ class SegTree { // Число минимумов на отрезке
       t_[x] = {v, 1};
       return;
     }
-    const auto m = (lx + rx) / 2;
-    if (i < m) Set(i, v, 2*x+1, lx, m);
-    else Set(i, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    if (i < m) Set(i, v, (x<<1), lx, m);
+    else Set(i, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
   }
 };
 
@@ -124,9 +130,11 @@ void Solution(std::istream& cin, std::ostream& cout) {
 
 int main() {
   std::ios::sync_with_stdio(false);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
