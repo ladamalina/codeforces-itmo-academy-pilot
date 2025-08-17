@@ -1,45 +1,49 @@
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 template<typename T>
 class SegTree { // Отрезок с максимальной суммой
  public:
   struct Node {
-    T seg = 0;
-    T pref = 0;
-    T suff = 0;
-    T sum = 0;
+    T seg = 0, pref = 0, suff = 0, sum = 0;
     Node() = default;
     explicit Node(T v) : seg(std::max(v, T(0))), pref(std::max(v, T(0))), suff(std::max(v, T(0))), sum(v) {}
-    Node(T v_seg, T v_pref, T v_suff, T v_sum) : seg(v_seg), pref(v_pref), suff(v_suff), sum(v_sum) {}
+    Node(T seg_, T pref_, T suff_, T sum_) : seg(seg_), pref(pref_), suff(suff_), sum(sum_) {}
   };
 
   explicit SegTree(const std::vector<T>& a) {
-    while (size_ < CI(a.size())) size_ *= 2;
-    t_ = std::vector<Node>(size_ * 2 - 1);
-    Init(a, 0, 0, size_);
+    while (size_ < SZ(a)) size_ <<= 1;
+    t_ = std::vector<Node>(size_ << 1);
+    Init(a, 1, 0, size_);
   }
 
   T GetMaxSum() {
@@ -47,11 +51,11 @@ class SegTree { // Отрезок с максимальной суммой
   }
 
   T GetMaxSum(int l, int r) {
-    return GetMaxSum(l, r, 0, 0, size_).seg;
+    return GetMaxSum(l, r, 1, 0, size_).seg;
   }
 
   void Set(int i, T v) {
-    Set(i, v, 0, 0, size_);
+    Set(i, v, 1, 0, size_);
   }
 
  private:
@@ -69,31 +73,31 @@ class SegTree { // Отрезок с максимальной суммой
 
   void Init(const std::vector<T>& a, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      if (lx < CI(a.size())) t_[x] = Node{a[lx]};
+      if (lx < SZ(a)) t_[x] = Node{a[lx]};
     } else {
-      const auto m = (lx + rx) / 2;
-      Init(a, 2*x+1, lx, m);
-      Init(a, 2*x+2, m, rx);
-      t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+      const auto m = (lx + rx) >> 1;
+      Init(a, (x<<1), lx, m);
+      Init(a, (x<<1)|1, m, rx);
+      t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
     }
   }
 
   [[nodiscard]] Node GetMaxSum(int l, int r, int x, int lx, int rx) {
     if (rx <= l || lx >= r) return {};
     if (rx <= r && lx >= l) return t_[x];
-    const auto m = (lx + rx) / 2;
-    return Combine(GetMaxSum(l, r, 2*x+1, lx, m), GetMaxSum(l, r, 2*x+2, m, rx));
+    const auto m = (lx + rx) >> 1;
+    return Combine(GetMaxSum(l, r, (x<<1), lx, m), GetMaxSum(l, r, (x<<1)|1, m, rx));
   }
 
   void Set(int i, T v, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      t_[x] = {v};
+      t_[x] = Node(v);
       return;
     }
-    const auto m = (lx + rx) / 2;
-    if (i < m) Set(i, v, 2*x+1, lx, m);
-    else Set(i, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    if (i < m) Set(i, v, (x<<1), lx, m);
+    else Set(i, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
   }
 };
 
@@ -144,6 +148,8 @@ void Solution(std::istream& cin, std::ostream& cout) {
 
 int main() {
   std::ios::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
 #ifndef NDEBUG
   TestSolution();
 #endif
