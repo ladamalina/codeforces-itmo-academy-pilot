@@ -1,44 +1,51 @@
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 class SegTree { // Первый элемент не меньше X - 2
  public:
   struct Node { int max = INT_MIN; };
 
   explicit SegTree(const std::vector<int>& a) {
-    while (size_ < CI(a.size())) size_ *= 2;
-    t_ = std::vector<Node>(size_ * 2 - 1);
-    Init(a, 0, 0, size_);
+    while (size_ < SZ(a)) size_ <<= 1;
+    t_ = std::vector<Node>(size_ << 1);
+    Init(a, 1, 0, size_);
   }
 
   int GetLowerBound(int i, int v) {
-    return GetLowerBound(i, v, 0, 0, size_);
+    return GetLowerBound(i, v, 1, 0, size_);
   }
 
   void Set(int i, int v) {
-    Set(i, v, 0, 0, size_);
+    Set(i, v, 1, 0, size_);
   }
 
  private:
@@ -51,12 +58,12 @@ class SegTree { // Первый элемент не меньше X - 2
 
   void Init(const std::vector<int>& a, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      if (lx < CI(a.size())) t_[x] = {a[lx]};
+      if (lx < SZ(a)) t_[x] = {a[lx]};
     } else {
-      const auto m = (lx + rx) / 2;
-      Init(a, 2*x+1, lx, m);
-      Init(a, 2*x+2, m, rx);
-      t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+      const auto m = (lx + rx) >> 1;
+      Init(a, (x<<1), lx, m);
+      Init(a, (x<<1)|1, m, rx);
+      t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
     }
   }
 
@@ -66,13 +73,13 @@ class SegTree { // Первый элемент не меньше X - 2
     if (lx + 1 == rx) {
       return t_[x].max >= v ? lx : -1;
     }
-    const auto m = (lx + rx) / 2;
-    if (t_[2*x+1].max >= v) {
-      auto l_lb = GetLowerBound(i, v, 2*x+1, lx, m);
+    const auto m = (lx + rx) >> 1;
+    if (t_[(x<<1)].max >= v) {
+      auto l_lb = GetLowerBound(i, v, (x<<1), lx, m);
       if (l_lb != -1) return l_lb;
     }
-    if (t_[2*x+2].max >= v) {
-      return GetLowerBound(i, v, 2*x+2, m, rx);
+    if (t_[(x<<1)|1].max >= v) {
+      return GetLowerBound(i, v, (x<<1)|1, m, rx);
     }
     return -1;
   }
@@ -82,10 +89,10 @@ class SegTree { // Первый элемент не меньше X - 2
       t_[x] = {v};
       return;
     }
-    const auto m = (lx + rx) / 2;
-    if (i < m) Set(i, v, 2*x+1, lx, m);
-    else Set(i, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    if (i < m) Set(i, v, (x<<1), lx, m);
+    else Set(i, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[(x<<1)], t_[(x<<1)|1]);
   }
 };
 
@@ -132,9 +139,11 @@ void Solution(std::istream& cin, std::ostream& cout) {
 
 int main() {
   std::ios::sync_with_stdio(false);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
