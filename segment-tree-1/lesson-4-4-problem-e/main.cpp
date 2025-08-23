@@ -1,44 +1,48 @@
-// #pragma GCC optimize("O3")
-// #pragma GCC optimize("unroll-loops")
-
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 class SegTree { // Землетрясения
 public:
   explicit SegTree(int n) {
-    while (size_ < n) size_ *= 2;
-    t_ = vi(size_ * 2 - 1, INT_MAX);
+    while (size_ < n) size_ <<= 1;
+    t_ = vi(size_ << 1, INT_MAX);
   }
 
   int Process(int l, int r, int p) {
-    return Process(l, r, 0, 0, size_, p);
+    return Process(l, r, 1, 0, size_, p);
   }
 
   void Set(int i, int v) {
-    Set(i, v, 0, 0, size_);
+    Set(i, v, 1, 0, size_);
   }
 
 private:
@@ -52,9 +56,9 @@ private:
       t_[x] = INT_MAX;
       return 1;
     }
-    const auto m = (lx + rx) / 2;
-    const auto res = Process(l, r, 2*x+1, lx, m, p) + Process(l, r, 2*x+2, m, rx, p);
-    t_[x] = std::min(t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    const auto res = Process(l, r, (x<<1), lx, m, p) + Process(l, r, (x<<1)|1, m, rx, p);
+    t_[x] = std::min(t_[(x<<1)], t_[(x<<1)|1]);
     return res;
   }
 
@@ -63,10 +67,10 @@ private:
       t_[x] = v;
       return;
     }
-    const auto m = (lx + rx) / 2;
-    if (i < m) Set(i, v, 2*x+1, lx, m);
-    else Set(i, v, 2*x+2, m, rx);
-    t_[x] = std::min(t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    if (i < m) Set(i, v, (x<<1), lx, m);
+    else Set(i, v, (x<<1)|1, m, rx);
+    t_[x] = std::min(t_[(x<<1)], t_[(x<<1)|1]);
   }
 };
 
@@ -119,9 +123,9 @@ int main() {
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
