@@ -1,30 +1,34 @@
-// #pragma GCC optimize("O3")
-// #pragma GCC optimize("unroll-loops")
-
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 template<typename T>
 class SegTree { // Присваивание к отрезку
@@ -35,17 +39,17 @@ public:
   };
   
   explicit SegTree(const std::vector<T>& a) {
-    while (size_ < CI(a.size())) size_ *= 2;
-    t_.resize(size_ * 2 - 1);
-    Init(a, 0, 0, size_);
+    while (size_ < SZ(a)) size_ <<= 1;
+    t_.resize(size_ << 1);
+    Init(a, 1, 0, size_);
   }
 
   void Modify(int l, int r, T v) {
-    Modify(l, r, v, 0, 0, size_);
+    Modify(l, r, v, 1, 0, size_);
   }
 
   T GetMin(int l, int r) {
-    return GetMin(l, r, 0, 0, size_).min;
+    return GetMin(l, r, 1, 0, size_).min;
   }
 
 private:
@@ -61,12 +65,12 @@ private:
 
   void Init(const std::vector<T>& a, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      if (lx < CI(a.size())) t_[x] = {a[lx], 0};
+      if (lx < SZ(a)) t_[x] = {a[lx], 0};
     } else {
-      const auto m = (lx + rx) / 2;
-      Init(a, 2*x+1, lx, m);
-      Init(a, 2*x+2, m, rx);
-      t_[x] = Combine(t_[x], t_[2*x+1], t_[2*x+2]);
+      const auto m = (lx + rx) >> 1;
+      Init(a, (x<<1), lx, m);
+      Init(a, (x<<1)|1, m, rx);
+      t_[x] = Combine(t_[x], t_[(x<<1)], t_[(x<<1)|1]);
     }
   }
 
@@ -77,10 +81,10 @@ private:
       t_[x].add += v;
       return;
     }
-    const auto m = (lx + rx) / 2;
-    Modify(l, r, v, 2*x+1, lx, m);
-    Modify(l, r, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[x], t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    Modify(l, r, v, (x<<1), lx, m);
+    Modify(l, r, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[x], t_[(x<<1)], t_[(x<<1)|1]);
   }
 
   Node GetMin(int l, int r, int x, int lx, int rx) {
@@ -88,9 +92,9 @@ private:
     if (rx <= r && lx >= l) {
       return t_[x];
     }
-    const auto m = (lx + rx) / 2;
-    const auto l_res = (l < m) ? GetMin(l, r, 2*x+1, lx, m) : Node{};
-    const auto r_res = (r > m) ? GetMin(l, r, 2*x+2, m, rx) : Node{};
+    const auto m = (lx + rx) >> 1;
+    const auto l_res = (l < m) ? GetMin(l, r, (x<<1), lx, m) : Node{};
+    const auto r_res = (r > m) ? GetMin(l, r, (x<<1)|1, m, rx) : Node{};
     return Combine(t_[x], l_res, r_res);
   }
 };
@@ -144,9 +148,9 @@ int main() {
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
