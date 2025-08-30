@@ -1,48 +1,22 @@
-// #pragma GCC optimize("O3")
-// #pragma GCC optimize("unroll-loops")
-
-// #include <bits/stdc++.h>
-
-#include <algorithm>
-#include <bitset>
-#include <cassert>
-#include <cctype>
-#include <chrono>
-#include <cmath>
-#include <deque>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <optional>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <stack>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <variant>
-#include <vector>
+// #pragma GCC optimize("O3,unroll-loops")
+#include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
 using ld = long double;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vvvi [[maybe_unused]] = std::vector<vvi>;
-using vvl [[maybe_unused]] = std::vector<vl>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
 #define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
 #define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
@@ -55,7 +29,6 @@ using vs [[maybe_unused]] = std::vector<std::string>;
 #define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 constexpr ll NO_OP = LLONG_MAX;
 
@@ -170,9 +143,9 @@ int main() {
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
