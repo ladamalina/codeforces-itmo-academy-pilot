@@ -1,30 +1,34 @@
-// #pragma GCC optimize("O3")
-// #pragma GCC optimize("unroll-loops")
-
+// #pragma GCC optimize("O3,unroll-loops")
 #include <bits/stdc++.h>
 
 using namespace std::literals;
 
 using ll = long long;
-using ii [[maybe_unused]] = std::pair<int, int>;
-using vi [[maybe_unused]] = std::vector<int>;
-using vl [[maybe_unused]] = std::vector<ll>;
-using vvi [[maybe_unused]] = std::vector<vi>;
-using vii [[maybe_unused]] = std::vector<ii>;
-using vb [[maybe_unused]] = std::vector<bool>;
-using vd [[maybe_unused]] = std::vector<double>;
-using vs [[maybe_unused]] = std::vector<std::string>;
+using ld = long double;
+using ii = std::pair<int, int>;
+using vi = std::vector<int>;
+using vvi = std::vector<vi>;
+using vvvi = std::vector<vvi>;
+using vl = std::vector<ll>;
+using vvl = std::vector<vl>;
+using vvvl = std::vector<vvl>;
+using vii = std::vector<ii>;
+using vb = std::vector<bool>;
+using vd = std::vector<ld>;
+using vs = std::vector<std::string>;
+using vc = std::vector<char>;
 
-#define FOR(_i, _a, _b) for (int _i = (_a); _i <= (_b); ++(_i))
-#define FORD(_i, _a, _b) for (int _i = (_a); _i >= (_b); --(_i))
+#define FOR(_i, _a, _b) for (auto _i = (_a); _i <= (_b); ++(_i))
+#define FORD(_i, _a, _b) for (auto _i = (_a); _i >= (_b); --(_i))
 #define RNG(_l) (_l).begin(), (_l).end()
 #define SORT(_l) std::sort((_l).begin(), (_l).end())
 #define CI(_v) static_cast<int>(_v)
 #define CL(_v) static_cast<ll>(_v)
-#define CD(_v) static_cast<double>(_v)
+#define CD(_v) static_cast<ld>(_v)
+#define CC(_v) static_cast<char>(_v)
+#define SZ(_v) static_cast<int>((_v).size())
 #define F first
 #define S second
-#define PB push_back
 
 template<typename T>
 class SegTree { // Присваивание, прибавление и сумма
@@ -37,21 +41,21 @@ public:
   };
   
   explicit SegTree(const std::vector<T>& a) {
-    while (size_ < CI(a.size())) size_ *= 2;
-    t_.resize(size_ * 2 - 1);
-    Init(a, 0, 0, size_);
+    while (size_ < SZ(a)) size_ <<= 1;
+    t_.resize(size_ << 1);
+    Init(a, 1, 0, size_);
   }
 
   void ModifySet(int l, int r, T v) {
-    ModifySet(l, r, v, 0, 0, size_);
+    ModifySet(l, r, v, 1, 0, size_);
   }
 
   void ModifyAdd(int l, int r, T v) {
-    ModifyAdd(l, r, v, 0, 0, size_);
+    ModifyAdd(l, r, v, 1, 0, size_);
   }
 
   T Get(int l, int r) {
-    return Get(l, r, 0, 0, size_).sum;
+    return Get(l, r, 1, 0, size_).sum;
   }
 
 private:
@@ -68,14 +72,14 @@ private:
 
   void Init(const std::vector<T>& a, int x, int lx, int rx) {
     if (lx + 1 == rx) {
-      if (lx < CI(a.size())) {
+      if (lx < SZ(a)) {
         t_[x] = {1, a[lx], NO_OP, 0};
       }
     } else {
-      const auto m = (lx + rx) / 2;
-      Init(a, 2*x+1, lx, m);
-      Init(a, 2*x+2, m, rx);
-      t_[x] = Combine(t_[x], t_[2*x+1], t_[2*x+2]);
+      const auto m = (lx + rx) >> 1;
+      Init(a, (x<<1), lx, m);
+      Init(a, (x<<1)|1, m, rx);
+      t_[x] = Combine(t_[x], t_[(x<<1)], t_[(x<<1)|1]);
     }
   }
 
@@ -83,15 +87,15 @@ private:
     if ((t_[x].set==NO_OP && t_[x].add==0) || lx+1 == rx) return;
     
     if (t_[x].set != NO_OP) {
-      t_[2*x+1] = {t_[2*x+1].cnt, t_[2*x+1].cnt*t_[x].set, t_[x].set, 0};
-      t_[2*x+2] = {t_[2*x+2].cnt, t_[2*x+2].cnt*t_[x].set, t_[x].set, 0};
+      t_[(x<<1)] = {t_[(x<<1)].cnt, t_[(x<<1)].cnt*t_[x].set, t_[x].set, 0};
+      t_[(x<<1)|1] = {t_[(x<<1)|1].cnt, t_[(x<<1)|1].cnt*t_[x].set, t_[x].set, 0};
     }
     if (t_[x].add != 0) {
-      t_[2*x+1] = {t_[2*x+1].cnt, t_[2*x+1].sum + t_[2*x+1].cnt*t_[x].add, t_[2*x+1].set, t_[2*x+1].add+t_[x].add};
-      t_[2*x+2] = {t_[2*x+2].cnt, t_[2*x+2].sum + t_[2*x+2].cnt*t_[x].add, t_[2*x+2].set, t_[2*x+2].add+t_[x].add};
+      t_[(x<<1)] = {t_[(x<<1)].cnt, t_[(x<<1)].sum + t_[(x<<1)].cnt*t_[x].add, t_[(x<<1)].set, t_[(x<<1)].add+t_[x].add};
+      t_[(x<<1)|1] = {t_[(x<<1)|1].cnt, t_[(x<<1)|1].sum + t_[(x<<1)|1].cnt*t_[x].add, t_[(x<<1)|1].set, t_[(x<<1)|1].add+t_[x].add};
     }
     
-    t_[x] = {t_[2*x+1].cnt+t_[2*x+2].cnt, t_[2*x+1].sum+t_[2*x+2].sum, NO_OP, 0};
+    t_[x] = {t_[(x<<1)].cnt+t_[(x<<1)|1].cnt, t_[(x<<1)].sum+t_[(x<<1)|1].sum, NO_OP, 0};
   }
 
   void ModifySet(int l, int r, T v, int x, int lx, int rx) {
@@ -101,10 +105,10 @@ private:
       t_[x] = {t_[x].cnt, t_[x].cnt*v, v, 0};
       return;
     }
-    const auto m = (lx + rx) / 2;
-    ModifySet(l, r, v, 2*x+1, lx, m);
-    ModifySet(l, r, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[x], t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    ModifySet(l, r, v, (x<<1), lx, m);
+    ModifySet(l, r, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[x], t_[(x<<1)], t_[(x<<1)|1]);
   }
 
   void ModifyAdd(int l, int r, T v, int x, int lx, int rx) {
@@ -114,10 +118,10 @@ private:
       t_[x] = {t_[x].cnt, t_[x].sum + t_[x].cnt*v, t_[x].set, t_[x].add+v};
       return;
     }
-    const auto m = (lx + rx) / 2;
-    ModifyAdd(l, r, v, 2*x+1, lx, m);
-    ModifyAdd(l, r, v, 2*x+2, m, rx);
-    t_[x] = Combine(t_[x], t_[2*x+1], t_[2*x+2]);
+    const auto m = (lx + rx) >> 1;
+    ModifyAdd(l, r, v, (x<<1), lx, m);
+    ModifyAdd(l, r, v, (x<<1)|1, m, rx);
+    t_[x] = Combine(t_[x], t_[(x<<1)], t_[(x<<1)|1]);
   }
 
   Node Get(int l, int r, int x, int lx, int rx) {
@@ -125,9 +129,9 @@ private:
     if (rx <= r && lx >= l) {
       return t_[x];
     }
-    const auto m = (lx + rx) / 2;
-    const auto m1 = Get(l, r, 2*x+1, lx, m);
-    const auto m2 = Get(l, r, 2*x+2, m, rx);
+    const auto m = (lx + rx) >> 1;
+    const auto m1 = Get(l, r, (x<<1), lx, m);
+    const auto m2 = Get(l, r, (x<<1)|1, m, rx);
     return Combine(t_[x], m1, m2);
   }
 };
@@ -184,9 +188,9 @@ int main() {
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
-// #ifndef NDEBUG
-//   TestSolution();
-// #endif
+#ifndef NDEBUG
+  TestSolution();
+#endif
   Solution(std::cin, std::cout);
   return 0;
 }
